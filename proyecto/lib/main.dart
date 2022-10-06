@@ -1,115 +1,327 @@
+import 'package:compras/models/productos_model.dart';
+import 'package:compras/pages/otra_pagina.dart';
+import 'package:compras/pages/pedido_lista.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.red,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'App Compras'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+  MyHomePage({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  List<ProductosModel> _productosModel = List<ProductosModel>();
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  List<ProductosModel> _listaCarro = List<ProductosModel>();
+
+  @override
+  void initState() {
+    super.initState();
+    _productosDb();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0, top: 8.0),
+            child: GestureDetector(
+              child: Stack(
+                alignment: Alignment.topCenter,
+                children: <Widget>[
+                  Icon(
+                    Icons.shopping_cart,
+                    size: 38,
+                  ),
+                  if (_listaCarro.length > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 2.0),
+                      child: CircleAvatar(
+                        radius: 8.0,
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        child: Text(
+                          _listaCarro.length.toString(),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 12.0),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              onTap: () {
+                if (_listaCarro.isNotEmpty)
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => Cart(_listaCarro),
+                    ),
+                  );
+              },
+            ),
+          )
+        ],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      drawer: Container(
+        width: 170.0,
+        child: Drawer(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.5,
+            color: Colors.black,
+            child: new ListView(
+              padding: EdgeInsets.only(top: 50.0),
+              children: <Widget>[
+                Container(
+                  height: 120,
+                  child: new UserAccountsDrawerHeader(
+                    accountName: new Text(''),
+                    accountEmail: new Text(''),
+                    decoration: new BoxDecoration(
+                      image: new DecorationImage(
+                        fit: BoxFit.fill,
+                        image: AssetImage('assets/images/food1.png'),
+                      ),
+                    ),
+                  ),
+                ),
+                new Divider(),
+                new ListTile(
+                  title: new Text(
+                    'Home',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  trailing: new Icon(
+                    Icons.home,
+                    size: 30.0,
+                    color: Colors.white,
+                  ),
+                  onTap: () => Navigator.of(context).push(new MaterialPageRoute(
+                    builder: (BuildContext context) => OtraPagina(),
+                  )),
+                ),
+                new Divider(),
+                new ListTile(
+                  title: new Text(
+                    'Cupones',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  trailing: new Icon(
+                    Icons.card_giftcard,
+                    size: 30.0,
+                    color: Colors.white,
+                  ),
+                  onTap: () => Navigator.of(context).push(new MaterialPageRoute(
+                    builder: (BuildContext context) => OtraPagina(),
+                  )),
+                ),
+                new Divider(),
+                new ListTile(
+                  title: new Text(
+                    'Tiendas',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  trailing: new Icon(
+                    Icons.place,
+                    size: 30.0,
+                    color: Colors.white,
+                  ),
+                  onTap: () => Navigator.of(context).push(new MaterialPageRoute(
+                    builder: (BuildContext context) => OtraPagina(),
+                  )),
+                ),
+                new Divider(),
+                new ListTile(
+                  title: new Text(
+                    'Produtos',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  trailing: new Icon(
+                    Icons.fastfood,
+                    size: 30.0,
+                    color: Colors.white,
+                  ),
+                  onTap: () => Navigator.of(context).push(new MaterialPageRoute(
+                    builder: (BuildContext context) => OtraPagina(),
+                  )),
+                ),
+                new Divider(),
+                new ListTile(
+                  title: new Text(
+                    'QR Code',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  trailing: new FaIcon(
+                    FontAwesomeIcons.qrcode,
+                    color: Colors.white,
+                    size: 30.0,
+                  ),
+                  onTap: () => Navigator.of(context).push(new MaterialPageRoute(
+                    builder: (BuildContext context) => OtraPagina(),
+                  )),
+                ),
+                new Divider(),
+              ],
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: _cuadroProductos(),
     );
+  }
+
+  GridView _cuadroProductos() {
+    return GridView.builder(
+      padding: const EdgeInsets.all(4.0),
+      gridDelegate:
+          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+      itemCount: _productosModel.length,
+      itemBuilder: (context, index) {
+        final String imagen = _productosModel[index].image;
+        var item = _productosModel[index];
+        return Card(
+            elevation: 4.0,
+            child: Stack(
+              fit: StackFit.loose,
+              alignment: Alignment.center,
+              children: <Widget>[
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: new Image.asset("assets/images/$imagen",
+                          fit: BoxFit.contain),
+                    ),
+                    Text(
+                      item.name,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 20.0),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 25,
+                        ),
+                        Text(
+                          item.price.toString(),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 23.0,
+                              color: Colors.black),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            right: 8.0,
+                            bottom: 8.0,
+                          ),
+                          child: Align(
+                            alignment: Alignment.bottomRight,
+                            child: GestureDetector(
+                              child: (!_listaCarro.contains(item))
+                                  ? Icon(
+                                      Icons.shopping_cart,
+                                      color: Colors.green,
+                                      size: 38,
+                                    )
+                                  : Icon(
+                                      Icons.shopping_cart,
+                                      color: Colors.red,
+                                      size: 38,
+                                    ),
+                              onTap: () {
+                                setState(() {
+                                  if (!_listaCarro.contains(item))
+                                    _listaCarro.add(item);
+                                  else
+                                    _listaCarro.remove(item);
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                )
+              ],
+            ));
+      },
+    );
+  }
+
+  void _productosDb() {
+    var list = <ProductosModel>[
+      ProductosModel(
+        name: 'Burguer King',
+        image: 'food1.png',
+        price: 12,
+      ),
+      ProductosModel(
+        name: 'Pizza Italiana',
+        image: 'food2.png',
+        price: 17,
+      ),
+      ProductosModel(
+        name: 'Carne..',
+        image: 'food3.png',
+        price: 25,
+      ),
+      ProductosModel(
+        name: 'Burger',
+        image: 'food4.png',
+        price: 19,
+      ),
+      ProductosModel(
+        name: 'Asado',
+        image: 'food5.png',
+        price: 11,
+      ),
+      ProductosModel(
+        name: 'Food Tailandesa',
+        image: 'food6.png',
+        price: 14,
+      ),
+      ProductosModel(
+        name: 'Pizza Big',
+        image: 'food7.png',
+        price: 15,
+      ),
+      ProductosModel(
+        name: 'Empanas',
+        image: 'food8.png',
+        price: 18,
+      ),
+    ];
+
+    setState(() {
+      _productosModel = list;
+    });
   }
 }
